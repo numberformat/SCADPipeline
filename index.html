@@ -7,11 +7,20 @@
     body { margin: 0; background: #111; }
     canvas { display: block; }
   </style>
+
+  <!-- 🔑 IMPORT MAP (this fixes everything) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
 </head>
 <body>
 
 <script type="module">
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+import * as THREE from "three";
 import { STLLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/STLLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
