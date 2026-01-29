@@ -35,6 +35,18 @@
       font-size: 14px;
       padding: 6px 8px;
     }
+    #downloadLink {
+      font-size: 13px;
+      padding: 6px 10px;
+      border: 1px solid #c9c9c9;
+      border-radius: 6px;
+      background: #f7f7f7;
+      color: #222;
+      text-decoration: none;
+    }
+    #downloadLink:hover {
+      background: #ececec;
+    }
     canvas {
       display: block;
     }
@@ -63,6 +75,7 @@
 <header>
   <label for="modelSelect">Model</label>
   <select id="modelSelect"></select>
+  <a id="downloadLink" href="#" download>Download STL</a>
   <span id="status"></span>
 </header>
 
@@ -75,6 +88,7 @@ import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/exampl
 
 const statusEl = document.getElementById("status");
 const modelSelect = document.getElementById("modelSelect");
+const downloadLink = document.getElementById("downloadLink");
 
 /* Scene */
 const scene = new THREE.Scene();
@@ -116,6 +130,8 @@ function setStatus(message) {
 
 function loadModel(stlPath) {
   setStatus("Loading…");
+  downloadLink.href = stlPath;
+  downloadLink.setAttribute("download", stlPath);
   loader.load(
     stlPath,
     geometry => {
