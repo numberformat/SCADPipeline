@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# Copyright (c) 2026 NOAMi (https://noami.us)
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path

@@ -1,42 +1,60 @@
 # SCADPipeline
-Test Repository for an OpenSCAD project
+
+A reusable CI/CD toolchain for OpenSCAD projects
+
+SCADPipeline turns OpenSCAD designs into a **software-style build pipeline**:
+
+* Parametric models in Git
+* Deterministic STL builds in CI
+* Web-based 3D previews
+* Versioned, downloadable releases
+
+This repository contains both a **reference implementation** (a cube and a cylinder) and the **pipeline itself**, which you can reuse across your own design projects without forking.
+
+---
 
 ## 3D Preview
 
 👉 **Interactive viewer:**
-https://numberformat.github.io/SCADPipeline/
+[https://numberformat.github.io/SCADPipeline/](https://numberformat.github.io/SCADPipeline/)
 
 👉 **Download STL:**
 [Latest Release](https://github.com/numberformat/SCADPipeline/releases/latest)
 
-A minimal reference project demonstrating how to:
+The geometry here is intentionally simple.
+The point of this repo is not the shapes — it is the **build system**.
 
-- Design parametric parts in **OpenSCAD**
-- Build STL files **headlessly in CI**
-- Publish generated artifacts via **GitHub Releases**
-- Preview STL geometry interactively using **GitHub Pages + Three.js**
-- Keep source control clean (generated STLs are not committed)
+---
 
-This repository intentionally keeps the model simple so the focus stays on **the pipeline**, not the geometry.
+## What this repository is
+
+This project serves two roles:
+
+1. A minimal example OpenSCAD project (cube + cylinder)
+2. A production-grade pipeline that can be imported into other repositories
+
+You can browse, build, and preview this repo directly — or you can treat it as an **OpenSCAD toolchain** and pull it into your own design projects.
 
 ---
 
 ## Design principles
 
-- **Source, not artifacts, live in Git**
-- **Generated STLs are built in CI**
-- **Pre-built assets are inputs**, committed under `src/assets/`
-- **CI is the compiler**
-- **Pages is a viewer**, not a build system
+* **Source, not artifacts, live in Git**
+* **Generated STLs are built in CI**
+* **Pre-built assets are inputs**, committed under `src/assets/`
+* **CI is the compiler**
+* **Pages is a viewer**, not a build system
 
 ---
 
 ## How it works
 
-- Builds run inside a Docker container with OpenSCAD preinstalled.
-- The repo is bind‑mounted into the container; outputs are written to `site/`.
-- The viewer loads `site/models.json` to populate the model dropdown.
-- GitHub Actions runs the same containerized build.
+* Builds run inside a Docker container with OpenSCAD preinstalled.
+* The repo is bind-mounted into the container; outputs are written to `site/`.
+* The viewer loads `site/models.json` to populate the model dropdown.
+* GitHub Actions runs the same containerized build.
+
+Everything that works locally also works in CI.
 
 ---
 
@@ -45,32 +63,41 @@ This repository intentionally keeps the model simple so the focus stays on **the
 Requirements: Docker Desktop (or Docker Engine).
 
 **macOS/Linux (bash):**
+
 ```bash
 ./build.sh
 ```
 
 **Windows/macOS/Linux (PowerShell 7+):**
+
 ```powershell
 ./build.ps1
 ```
 
 Both scripts run the same Docker container and:
 
-- Create `site/`
-- Copy `docs/index.html` and `.nojekyll`
-- Render each `*.scad` in `src/models/` to `site/*.stl`
-- Copy pre-built assets from `src/assets/` into `site/assets/` (STL assets are listed in `site/models.json`)
-- Generate `site/models.json` for the viewer dropdown
+* Create `site/`
+* Copy `docs/index.html` and `.nojekyll`
+* Render each `*.scad` in `src/models/` to `site/*.stl`
+* Copy pre-built assets from `src/assets/` into `site/assets/`
+* Generate `site/models.json` for the viewer dropdown
 
 The viewer lists both compiled STLs (from `src/models/`) and pre-built STLs (from `src/assets/`). For simplicity, the build uses **top-level files only** (no recursion).
 
-### Assets-only template
+---
 
-To use this repository without OpenSCAD sources, put your `*.stl` files directly in `src/assets/` and skip `src/models/` entirely. The build will publish your pre-built STLs into the viewer with no `.scad` files required.
+### Assets-only projects
 
-### Run viewer
+You can use SCADPipeline without OpenSCAD sources at all.
 
-Serve the built site locally (defaults to http://localhost:8080; if taken, the script will pick the next available port). You can also force a port with `SITE_PORT`.
+Put your `*.stl` files in `src/assets/` and leave `src/models/` empty.
+The build will publish your pre-built STLs into the viewer with no `.scad` files required.
+
+---
+
+### Run the viewer
+
+Serve the built site locally (defaults to [http://localhost:8080](http://localhost:8080); if taken, the script picks the next available port). You can override with `SITE_PORT`.
 
 ```bash
 ./run.sh
@@ -79,6 +106,8 @@ Serve the built site locally (defaults to http://localhost:8080; if taken, the s
 ```powershell
 ./run.ps1
 ```
+
+---
 
 ### Clean artifacts
 
@@ -92,11 +121,13 @@ Remove all generated build output.
 ./clean.ps1
 ```
 
+---
+
 ### Docker image
 
 Default image: `openscad/openscad:bookworm`
 
-If you're on Apple Silicon (arm64) and see a manifest error, set:
+If you're on Apple Silicon (arm64) and see a manifest error:
 
 ```bash
 export OPENSCAD_DOCKER_PLATFORM="linux/amd64"
@@ -106,7 +137,7 @@ export OPENSCAD_DOCKER_PLATFORM="linux/amd64"
 $env:OPENSCAD_DOCKER_PLATFORM = "linux/amd64"
 ```
 
-Override with `OPENSCAD_DOCKER_IMAGE` if you want a different tag:
+Override the image if needed:
 
 ```bash
 export OPENSCAD_DOCKER_IMAGE="openscad/openscad:bookworm"
@@ -118,18 +149,184 @@ $env:OPENSCAD_DOCKER_IMAGE = "openscad/openscad:bookworm"
 
 ---
 
+## Using SCADPipeline in Your Own Projects (No Forking Required)
+
+SCADPipeline is designed to be reused across many OpenSCAD design projects without forking this repository or dealing with Git submodules.
+
+Instead, each design project pulls a **snapshot** of the SCADPipeline build system using a small update script.
+This gives you all of the CI/CD, viewer, and build logic — without inheriting this repository’s history or demo models.
+
+Think of SCADPipeline as a **toolchain**, not a template.
+
+---
+
+### How it works
+
+SCADPipeline publishes itself as a downloadable snapshot via GitHub.
+Your project pulls that snapshot and copies the pipeline files into your repo.
+
+Your design stays yours.
+The pipeline stays updatable.
+
+You choose when to upgrade.
+
+---
+
+### Step 1 — Add the update script to your project
+
+In the root of your own OpenSCAD project, add one of these:
+
+#### macOS / Linux
+
+Create `get_pipeline.sh`:
+
+```bash
+#!/usr/bin/env bash
+set -e
+
+REPO_URL="https://github.com/numberformat/SCADPipeline/archive/refs/heads/main.zip"
+TMP_DIR="$(mktemp -d)"
+
+echo "Downloading SCADPipeline..."
+curl -L "$REPO_URL" -o "$TMP_DIR/pipeline.zip"
+
+echo "Extracting..."
+unzip -q "$TMP_DIR/pipeline.zip" -d "$TMP_DIR"
+
+PIPELINE_DIR="$(find "$TMP_DIR" -maxdepth 1 -type d -name "SCADPipeline-*")"
+
+# Copy the pipeline into this project
+rsync -av \
+  --exclude 'examples/' \
+  --exclude '*.scad' \
+  "$PIPELINE_DIR/" \
+  "./"
+
+rm -rf "$TMP_DIR"
+
+echo "SCADPipeline updated."
+```
+
+Then make it executable:
+
+```bash
+chmod +x get_pipeline.sh
+```
+
+---
+
+#### Windows (PowerShell)
+
+Create `get_pipeline.ps1`:
+
+```powershell
+$RepoUrl = "https://github.com/numberformat/SCADPipeline/archive/refs/heads/main.zip"
+$Temp = New-Item -ItemType Directory -Path ([System.IO.Path]::GetTempPath() + [System.Guid]::NewGuid())
+
+Write-Host "Downloading SCADPipeline..."
+Invoke-WebRequest $RepoUrl -OutFile "$Temp\pipeline.zip"
+
+Write-Host "Extracting..."
+Expand-Archive "$Temp\pipeline.zip" "$Temp"
+
+$PipelineDir = Get-ChildItem $Temp | Where-Object { $_.Name -like "SCADPipeline-*" } | Select-Object -First 1
+
+# Copy everything except example models
+Get-ChildItem $PipelineDir.FullName -Recurse | Where-Object {
+    $_.FullName -notmatch "\\examples\\" -and $_.Extension -ne ".scad"
+} | ForEach-Object {
+    $target = $_.FullName.Replace($PipelineDir.FullName, (Get-Location).Path)
+    New-Item -ItemType Directory -Path (Split-Path $target) -Force | Out-Null
+    Copy-Item $_.FullName $target -Force
+}
+
+Remove-Item $Temp -Recurse -Force
+Write-Host "SCADPipeline updated."
+```
+
+---
+
+### Step 2 — Pull SCADPipeline into your project
+
+Run the script from your project root:
+
+**macOS / Linux**
+
+```bash
+./get_pipeline.sh
+```
+
+**Windows**
+
+```powershell
+.\get_pipeline.ps1
+```
+
+This copies all CI/CD, viewer, and build logic from SCADPipeline into your project.
+
+Your own `.scad` models are not touched.
+
+---
+
+### Step 3 — Commit the pipeline into your repo
+
+After pulling the pipeline, commit the files:
+
+```bash
+git add .
+git commit -m "Add SCADPipeline build system"
+```
+
+Your project now has a frozen, reproducible version of the SCADPipeline.
+
+---
+
+### Updating the pipeline later
+
+Whenever you want the latest version:
+
+```bash
+./get_pipeline.sh
+# or
+.\get_pipeline.ps1
+```
+
+Then commit the changes.
+
+This gives you **opt-in upgrades** — no breaking changes unless you choose them.
+
+---
+
+### Why this is better than forking
+
+Forks rot.
+Submodules confuse people.
+Monorepos tangle unrelated designs.
+
+This approach gives you:
+
+• Full isolation per design
+• Reproducible builds
+• Zero Git coupling
+• CI/CD that just works
+• A real pipeline you can version
+
+SCADPipeline becomes your **OpenSCAD toolchain**, not your project’s parent.
+
+---
+
 ## Releases
 
 Each successful build on `main` creates a GitHub Release with:
 
-- Versioned tag
-- Generated STL attached as an asset
+* A versioned tag
+* Generated STL files attached as assets
 
 ---
 
 ## License
 
-The repository and pipeline are licensed under the GNU Affero General Public License v3 (AGPL-3.0). The OpenSCAD sources (`src/models/`) and any pre-built STLs in `src/assets/` may be governed by their own licenses, so this AGPL file may not cover those files; check each asset before reuse.
+This repository is licensed under the MIT License. OpenSCAD models (`src/models/`) and pre-built assets (`src/assets/`) may be governed by their own licenses; check each asset before reuse.
 
 ---
 
@@ -141,7 +338,9 @@ This repository demonstrates a simple but powerful idea:
 
 Once you remove the GUI dependency, CAD becomes:
 
-- Automatable
-- Reviewable
-- Reproducible
-- Shareable
+* Automatable
+* Reviewable
+* Reproducible
+* Shareable
+
+That’s the real product here.
