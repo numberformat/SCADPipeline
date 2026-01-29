@@ -127,6 +127,12 @@ Each successful build on `main` creates a GitHub Release with:
 
 ---
 
+## License
+
+The repository and pipeline are licensed under the GNU Affero General Public License v3 (AGPL-3.0). The OpenSCAD sources (`src/models/`) and any pre-built STLs in `src/assets/` may be governed by their own licenses, so this AGPL file may not cover those files; check each asset before reuse.
+
+---
+
 ## Why this matters
 
 This repository demonstrates a simple but powerful idea:
