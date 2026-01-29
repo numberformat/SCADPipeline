@@ -206,7 +206,9 @@ That’s the real point of this project.
 
 ## Local Build
 
-This repo includes two local build scripts that mirror CI output.
+Builds run entirely in Docker (no local OpenSCAD install required).
+
+Requirements: Docker Desktop (or Docker Engine).
 
 **macOS/Linux (bash):**
 ```bash
@@ -215,24 +217,36 @@ This repo includes two local build scripts that mirror CI output.
 
 **Windows/macOS/Linux (PowerShell 7+):**
 ```powershell
-./build.ps1
+$env$env:OPENSCAD_DOCKER_IMAGE = "openscad/openscad:bookworm"
 ```
 
-Both scripts:
+Both scripts run the same Docker container and:
 
 - Create `site/`
 - Copy `docs/index.html` and `.nojekyll`
 - Render each `*.scad` in `src/models/` to `site/*.stl`
 - Generate `site/models.json` for the viewer dropdown
 
-### OpenSCAD location
+### Docker image
 
-If `openscad` is not on `PATH`, set `OPENSCAD_BIN` to the executable path:
+Default image: `openscad/openscad:bookworm`
+
+If you're on Apple Silicon (arm64) and see a manifest error, set:
 
 ```bash
-export OPENSCAD_BIN="/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
+export OPENSCAD_DOCKER_PLATFORM="linux/amd64"
 ```
 
 ```powershell
-$env:OPENSCAD_BIN = "C:\Program Files\OpenSCAD\openscad.exe"
+$env:OPENSCAD_DOCKER_PLATFORM = "linux/amd64"
+```
+
+Override with `OPENSCAD_DOCKER_IMAGE` if you want a different tag:
+
+```bash
+export OPENSCAD_DOCKER_IMAGE="openscad/openscad:bookworm"
+```
+
+```powershell
+$env:OPENSCAD_DOCKER_IMAGE = "openscad/openscad:bookworm"
 ```

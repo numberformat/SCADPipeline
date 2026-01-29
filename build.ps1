@@ -4,40 +4,41 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
-$openscad = $env:OPENSCAD_BIN
-if ([string]::IsNullOrWhiteSpace($openscad) -or -not (Test-Path $openscad)) {
-  $cmd = Get-Command "openscad.exe" -ErrorAction SilentlyContinue
-  if ($cmd) {
-    $openscad = $cmd.Source
-  } elseif (Test-Path "C:\Program Files\OpenSCAD\openscad.exe") {
-    $openscad = "C:\Program Files\OpenSCAD\openscad.exe"
-  } elseif (Test-Path "C:\Program Files (x86)\OpenSCAD\openscad.exe") {
-    $openscad = "C:\Program Files (x86)\OpenSCAD\openscad.exe"
-  } else {
-    Write-Error "ERROR: OpenSCAD not found. Install OpenSCAD or set OPENSCAD_BIN."
-    exit 1
-  }
-}
-
-New-Item -ItemType Directory -Force -Path "site" | Out-Null
-Copy-Item -Force "docs/index.html" "site/index.html"
-Copy-Item -Force ".nojekyll" "site/.nojekyll"
-
-$scadFiles = Get-ChildItem -Path "src/models" -Filter "*.scad" -File
-if ($scadFiles.Count -eq 0) {
-  Write-Error "No .scad files found in src/models."
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+  Write-Error "ERROR: docker not found. Install Docker Desktop and try again."
   exit 1
 }
 
-$models = @()
-foreach ($file in $scadFiles) {
-  $base = [System.IO.Path]::GetFileNameWithoutExtension($file.Name)
-  $out = "site/$base.stl"
-  & $openscad -o $out $file.FullName
-  $models += "$base.stl"
+$image = $env:OPENSCAD_DOCKER_IMAGE
+if ([string]::IsNullOrWhiteSpace($image)) {
+  $image = "openscad/openscad:bookworm"
 }
 
-$json = "[" + ($models | ForEach-Object { '"' + $_ + '"' }) -join "," + "]"
-Set-Content -Path "site/models.json" -Value $json -NoNewline
+$platform = $env:OPENSCAD_DOCKER_PLATFORM
+if ([string]::IsNullOrWhiteSpace($platform)) {
+  if ($IsMacOS) {
+    $arch = (& uname -m).Trim()
+    if ($arch -eq "arm64" -or $arch -eq "aarch64") {
+      $platform = "linux/amd64"
+    }
+  }
+}
 
-Write-Host "Build complete. Output in ./site"
+$mount = "$(Get-Location):/workspace"
+$userArgs = @()
+if (-not $IsWindows) {
+  $uid = & id -u
+  $gid = & id -g
+  $userArgs = @("--user", "$uid:$gid")
+}
+
+$platformArgs = @()
+if (-not [string]::IsNullOrWhiteSpace($platform)) {
+  $platformArgs = @("--platform", $platform)
+}
+
+& docker run --rm @userArgs @platformArgs `
+  -v $mount `
+  -w /workspace `
+  $image `
+  bash /workspace/scripts/docker-build.sh

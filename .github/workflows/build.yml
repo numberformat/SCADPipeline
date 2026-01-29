@@ -6,8 +6,11 @@ on:
       - develop
       - main
     paths:
-      - "**.scad"
+      - "src/**"
       - "docs/**"
+      - "scripts/**"
+      - "build.sh"
+      - "build.ps1"
       - ".github/workflows/build.yml"
 
 permissions:
@@ -16,42 +19,21 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      OPENSCAD_DOCKER_IMAGE: openscad/openscad:bookworm
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install OpenSCAD
+      - name: Build with Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openscad
-
-      - name: Build site directory
-        run: |
-          mkdir -p site
-          cp docs/index.html site/
-          cp .nojekyll site/
-
-      - name: Render STLs
-        run: |
-          shopt -s nullglob
-          scad_files=( src/models/*.scad )
-          if [ ${#scad_files[@]} -eq 0 ]; then
-            echo "No .scad files found in src/models."
-            exit 1
-          fi
-
-          printf "[" > site/models.json
-          first=1
-          for file in "${scad_files[@]}"; do
-            base="$(basename "${file%.scad}")"
-            out="site/${base}.stl"
-            openscad -o "$out" "$file"
-            if [ $first -eq 0 ]; then printf "," >> site/models.json; fi
-            printf "\"%s.stl\"" "$base" >> site/models.json
-            first=0
-          done
-          printf "]" >> site/models.json
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            "$OPENSCAD_DOCKER_IMAGE" \
+            bash /workspace/scripts/docker-build.sh
 
       # 🔎 Develop branch: build only
       - name: Upload STL artifact (develop only)
