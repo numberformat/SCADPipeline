@@ -200,9 +200,13 @@ rsync -av \
   --exclude 'examples/' \
   --exclude '*.scad' \
   --exclude 'LICENSE' \
-  --exclude 'README.md' \
   "$PIPELINE_DIR/" \
   "./"
+
+cp "$PIPELINE_DIR/README.md" "./README_pipeline.md"
+if [ -f "./README_template.md" ]; then
+  mv "./README_template.md" "./README.md"
+fi
 
 rm -rf "$TMP_DIR"
 
@@ -237,11 +241,16 @@ $PipelineDir = Get-ChildItem $Temp | Where-Object { $_.Name -like "SCADPipeline-
 Get-ChildItem $PipelineDir.FullName -Recurse | Where-Object {
     $_.FullName -notmatch "\\examples\\" -and
     $_.Extension -ne ".scad" -and
-    $_.FullName -notmatch "(?:^|[\\/])(README\.md|LICENSE)$"
+    $_.FullName -notmatch "(?:^|[\\/])LICENSE$"
 } | ForEach-Object {
     $target = $_.FullName.Replace($PipelineDir.FullName, (Get-Location).Path)
     New-Item -ItemType Directory -Path (Split-Path $target) -Force | Out-Null
     Copy-Item $_.FullName $target -Force
+}
+
+Copy-Item (Join-Path $PipelineDir.FullName "README.md") (Join-Path (Get-Location).Path "README_pipeline.md") -Force
+if (Test-Path "README_template.md") {
+  Move-Item "README_template.md" "README.md" -Force
 }
 
 Remove-Item $Temp -Recurse -Force
