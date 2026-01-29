@@ -199,6 +199,8 @@ PIPELINE_DIR="$(find "$TMP_DIR" -maxdepth 1 -type d -name "SCADPipeline-*")"
 rsync -av \
   --exclude 'examples/' \
   --exclude '*.scad' \
+  --exclude 'LICENSE' \
+  --exclude 'README.md' \
   "$PIPELINE_DIR/" \
   "./"
 
@@ -233,7 +235,9 @@ $PipelineDir = Get-ChildItem $Temp | Where-Object { $_.Name -like "SCADPipeline-
 
 # Copy everything except example models
 Get-ChildItem $PipelineDir.FullName -Recurse | Where-Object {
-    $_.FullName -notmatch "\\examples\\" -and $_.Extension -ne ".scad"
+    $_.FullName -notmatch "\\examples\\" -and
+    $_.Extension -ne ".scad" -and
+    $_.FullName -notmatch "(?:^|[\\/])(README\.md|LICENSE)$"
 } | ForEach-Object {
     $target = $_.FullName.Replace($PipelineDir.FullName, (Get-Location).Path)
     New-Item -ItemType Directory -Path (Split-Path $target) -Force | Out-Null
@@ -321,6 +325,18 @@ Each successful build on `main` creates a GitHub Release with:
 
 * A versioned tag
 * Generated STL files attached as assets
+
+## GitHub Pages
+
+This build pipeline includes a viewer that publishes your model objects to GitHub Pages.
+
+GitHub Pages is a free hosting service for static sites. It needs to be enabled for each repo (it is off by default).
+
+1. Go to your repository **Settings**.
+2. Select **Pages** in the left nav.
+3. Under **Source**, choose **Deploy from a Branch**.
+4. Select the `gh-pages` branch and `/ (root)` as the folder.
+5. Click **Save**. Within a few minutes, your viewer (with compiled STLs) will be live.
 
 ---
 
