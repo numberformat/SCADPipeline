@@ -62,16 +62,23 @@ Everything that works locally also works in CI.
 
 Requirements: Docker Desktop (or Docker Engine).
 
+If you use the GitHub setup wizard, your token is saved to `~/.scadpipeline` on your host.
+When creating a classic PAT, use minimal scopes:
+- public repos only: `public_repo`
+- private repos: `repo`
+- org repos: `admin:org`
+Avoid `delete_repo` and `project` unless you explicitly need them.
+
 **macOS/Linux (bash):**
 
 ```bash
-./build.sh
+./pipeline.sh build
 ```
 
 **Windows/macOS/Linux (PowerShell 7+):**
 
 ```powershell
-./build.ps1
+./pipeline.ps1 build
 ```
 
 Both scripts run the same Docker container and:
@@ -100,11 +107,11 @@ The build will publish your pre-built STLs into the viewer with no `.scad` files
 Serve the built site locally (defaults to [http://localhost:8080](http://localhost:8080); if taken, the script picks the next available port). You can override with `SITE_PORT`.
 
 ```bash
-./run.sh
+./pipeline.sh run
 ```
 
 ```powershell
-./run.ps1
+./pipeline.ps1 run
 ```
 
 ---
@@ -114,11 +121,11 @@ Serve the built site locally (defaults to [http://localhost:8080](http://localho
 Remove all generated build output.
 
 ```bash
-./clean.sh
+./pipeline.sh clean
 ```
 
 ```powershell
-./clean.ps1
+./pipeline.ps1 clean
 ```
 
 ---
@@ -340,6 +347,30 @@ Each successful build on `main` creates a GitHub Release with:
 This build pipeline includes a viewer that publishes your model objects to GitHub Pages.
 
 GitHub Pages is a free hosting service for static sites. It needs to be enabled for each repo (it is off by default).
+
+**Optional (guided, console-only auth supported):**
+
+```bash
+./pipeline.sh create-github
+```
+
+```powershell
+./pipeline.ps1 create-github
+```
+
+The setup will initialize a git repo if needed, commit your current files, and ask how to handle any existing `origin` remote.
+
+If GitHub Actions is disabled in the new repo, enable it here:
+
+```
+https://github.com/<owner>/<repo>/settings/actions
+```
+
+After GitHub Actions publishes the `gh-pages` branch, enable Pages here:
+
+```
+https://github.com/<owner>/<repo>/settings/pages
+```
 
 1. Go to your repository **Settings**.
 2. Select **Pages** in the left nav.

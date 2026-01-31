@@ -16,12 +16,12 @@ Short description of the design project.
 
 **macOS / Linux (bash):**
 ```bash
-./build.sh
+./pipeline.sh build
 ```
 
 **Windows (PowerShell 7+):**
 ```powershell
-./build.ps1
+./pipeline.ps1 build
 ```
 
 ---
@@ -31,14 +31,54 @@ Short description of the design project.
 Run the local viewer:
 
 ```bash
-./run.sh
+./pipeline.sh run
 ```
 
 ```powershell
-./run.ps1
+./pipeline.ps1 run
 ```
 
 Enable GitHub Pages to publish the viewer:
+
+Optional (guided, console-only auth supported):
+
+```bash
+./pipeline.sh create-github
+```
+
+```powershell
+./pipeline.ps1 create-github
+```
+
+The setup will initialize a git repo if needed, commit your current files, and ask how to handle any existing `origin` remote.
+
+If GitHub Actions is disabled in the new repo, enable it here:
+
+```
+https://github.com/<owner>/<repo>/settings/actions
+```
+
+After GitHub Actions publishes the `gh-pages` branch, enable Pages here:
+
+```
+https://github.com/<owner>/<repo>/settings/pages
+```
+
+Token scope guidance (classic PAT):
+- public repos only: `public_repo`
+- private repos: `repo`
+- org repos: `admin:org` 
+Avoid `delete_repo` and `project` unless you explicitly need them.
+
+Optional (guided):
+
+```bash
+./pipeline.sh create-github
+```
+
+```powershell
+./pipeline.ps1 create-github
+```
 
 1. Go to **Settings** → **Pages**
 2. **Source**: Deploy from a Branch
