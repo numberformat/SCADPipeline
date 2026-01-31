@@ -335,7 +335,8 @@ The point of this repo is not the shapes — it is the <strong>build system</str
 <p>Everything that works locally also works in CI.</p>
 <hr />
 <h2>Local build (Docker only)</h2>
-<p>Requirements: Docker Desktop (or Docker Engine).</p>
+<p>Requirements: Docker Desktop (or Docker Engine).
+The build runs in a container and auto-builds the local image as needed.</p>
 <p>If you use the GitHub setup wizard, your token is saved to <code>~/.scadpipeline</code> on your host.
 When creating a classic PAT, use minimal scopes:
 - public repos only: <code>public_repo</code>
@@ -379,20 +380,6 @@ The build will publish your pre-built STLs into the viewer with no <code>.scad</
 </code></pre>
 <pre><code class="language-powershell">.\pipeline.ps1 clean
 </code></pre>
-<hr />
-<h3>Docker image</h3>
-<p>Default image: <code>scadpipeline:latest</code> (auto-built from <code>Dockerfile</code> if missing)</p>
-<p>If you're on Apple Silicon (arm64) and see a manifest error:</p>
-<pre><code class="language-bash">export OPENSCAD_DOCKER_PLATFORM=&quot;linux/amd64&quot;
-</code></pre>
-<pre><code class="language-powershell">$env:OPENSCAD_DOCKER_PLATFORM = &quot;linux/amd64&quot;
-</code></pre>
-<p>Override the image if needed:</p>
-<pre><code class="language-bash">export OPENSCAD_DOCKER_IMAGE=&quot;openscad/openscad:bookworm&quot;
-</code></pre>
-<pre><code class="language-powershell">$env:OPENSCAD_DOCKER_IMAGE = &quot;openscad/openscad:bookworm&quot;
-</code></pre>
-<p>The default image is built from <code>Dockerfile</code> and includes ImageMagick (for <code>src/images</code> conversion) and GitHub CLI.</p>
 <hr />
 <h2>Using SCADPipeline in Your Own Projects (No Forking Required)</h2>
 <p>SCADPipeline is designed to be reused across many OpenSCAD design projects without forking this repository or dealing with Git submodules.</p>
@@ -438,12 +425,13 @@ if [ -f &quot;./README_template.md&quot; ]; then
   mv &quot;./README_template.md&quot; &quot;./README.md&quot;
 fi
 
-mkdir -p src/assets src/config src/lib src/models
+mkdir -p src/assets src/config src/images src/lib src/models
 
 rm -rf &quot;$TMP_DIR&quot;
 
 echo &quot;SCADPipeline updated.&quot;
 </code></pre>
+<p>This also creates <code>src/images/</code> for optional user-provided images.</p>
 <p>Then make it executable:</p>
 <pre><code class="language-bash">chmod +x get_pipeline.sh
 </code></pre>
@@ -477,11 +465,12 @@ if (Test-Path &quot;README_template.md&quot;) {
   Move-Item &quot;README_template.md&quot; &quot;README.md&quot; -Force
 }
 
-New-Item -ItemType Directory -Path &quot;src/assets&quot;,&quot;src/config&quot;,&quot;src/lib&quot;,&quot;src/models&quot; -Force | Out-Null
+New-Item -ItemType Directory -Path &quot;src/assets&quot;,&quot;src/config&quot;,&quot;src/images&quot;,&quot;src/lib&quot;,&quot;src/models&quot; -Force | Out-Null
 
 Remove-Item $Temp -Recurse -Force
 Write-Host &quot;SCADPipeline updated.&quot;
 </code></pre>
+<p>This also creates <code>src/images/</code> for optional user-provided images.</p>
 <hr />
 <h3>Step 2 — Pull SCADPipeline into your project</h3>
 <p>Run the script from your project root:</p>
