@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>SCADPipeline Viewer</title>
+  <title>3D Model Viewer</title>
 
   <style>
     html, body {
@@ -22,7 +22,7 @@
     .page {
       display: grid;
       grid-template-columns: 1fr 220px;
-      gap: 18px;
+      gap: 0;
       min-height: 100vh;
       align-content: start;
       padding: 24px;
@@ -37,6 +37,7 @@
       border: 1px solid #d2d2d2;
       overflow: hidden;
       height: var(--viewer-height);
+      margin: 0 18px 18px 0;
     }
     .viewer-media {
       position: absolute;
@@ -120,6 +121,7 @@
       border-radius: 16px;
       padding: 10px;
       overflow-y: auto;
+      margin: 0 0 18px 18px;
     }
     .thumbs h2 {
       margin: 6px 6px 12px;
@@ -167,6 +169,7 @@
         overflow-x: auto;
         overflow-y: hidden;
         white-space: nowrap;
+        margin: 0 0 18px 0;
       }
       .thumbs h2 {
         margin: 0 10px 0 6px;
@@ -184,6 +187,73 @@
         height: 90px;
       }
     }
+    .readme {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: 0;
+    }
+    .tabs {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 6px;
+      margin-top: 18px;
+      border-bottom: 1px solid #d2d2d2;
+    }
+    .tab-btn {
+      border: 1px solid #d2d2d2;
+      border-bottom: 0;
+      background: #efefef;
+      padding: 8px 14px;
+      border-radius: 10px 10px 0 0;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: #111;
+      border-color: #d2d2d2;
+    }
+    .tab-panel {
+      grid-column: 1 / -1;
+      width: 100%;
+      margin: 0 0 48px;
+      padding: 24px;
+      background: #ffffff;
+      border: 1px solid #d2d2d2;
+      border-radius: 0 16px 16px 16px;
+      box-sizing: border-box;
+      color: #222;
+    }
+    .tab-panel.hidden {
+      display: none;
+    }
+    .page-title {
+      grid-column: 1 / -1;
+      margin: 8px 0 0;
+      font-size: 28px;
+      letter-spacing: 0.4px;
+    }
+    .build-date {
+      grid-column: 1 / -1;
+      margin: 6px 0 12px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      opacity: 0.6;
+    }
+    .readme h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+    .readme pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #f7f7f7;
+      padding: 12px 14px;
+      border-radius: 10px;
+      overflow: auto;
+    }
   </style>
 
   <script type="importmap">
@@ -198,6 +268,7 @@
 <body>
 
 <div class="page">
+  <!--PAGE_TITLE-->
   <div class="viewer" id="viewer">
     <button class="nav-btn nav-left" id="prevBtn" aria-label="Previous image">◀</button>
     <div class="viewer-media" id="viewerMedia">
@@ -212,6 +283,16 @@
     <div id="thumbList"></div>
     <div class="status" id="status"></div>
   </aside>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="readme">README</button>
+    <button class="tab-btn" data-tab="license">LICENSE</button>
+  </div>
+  <section class="tab-panel" id="readme-tab">
+    <!--README-->
+  </section>
+  <section class="tab-panel hidden" id="license-tab">
+    <!--LICENSE-->
+  </section>
 </div>
 
 <script type="module">
@@ -228,6 +309,9 @@ const toggleBtn = document.getElementById("toggleViewer");
 const downloadLink = document.getElementById("downloadLink");
 const viewer = document.getElementById("viewer");
 const viewerMedia = document.getElementById("viewerMedia");
+const tabButtons = [...document.querySelectorAll(".tab-btn")];
+const readmeTab = document.getElementById("readme-tab");
+const licenseTab = document.getElementById("license-tab");
 
 let images = [];
 let current = 0;
@@ -261,6 +345,14 @@ let currentEdges = null;
 
 function setStatus(message) {
   statusEl.textContent = message || "";
+}
+
+function setTab(name) {
+  tabButtons.forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === name);
+  });
+  readmeTab.classList.toggle("hidden", name !== "readme");
+  licenseTab.classList.toggle("hidden", name !== "license");
 }
 
 function setActive(index) {
@@ -312,6 +404,10 @@ nextBtn.addEventListener("click", next);
 window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") next();
   if (event.key === "ArrowLeft") prev();
+});
+
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => setTab(btn.dataset.tab));
 });
 
 function loadStl(stlPath) {
@@ -379,6 +475,7 @@ async function init() {
     buildThumbs();
     setActive(0);
     resize();
+    setTab("readme");
   } catch (err) {
     setStatus("No images found.");
   }

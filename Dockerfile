@@ -7,6 +7,8 @@ RUN apt-get update \
     git \
     gnupg \
     imagemagick \
+    python3 \
+    python3-markdown \
   && mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \

@@ -85,6 +85,7 @@ Both scripts run the same Docker container and:
 
 * Create `site/`
 * Copy `docs/index.html` and `.nojekyll`
+* Append `README.md` (rendered as HTML) to the end of the viewer page
 * Render each `*.scad` in `src/models/` to `site/*.stl`
 * Copy pre-built assets from `src/assets/` into `site/assets/`
 * Render PNG previews for each STL into `site/images/` with an `_stl` suffix

@@ -8,6 +8,7 @@ Short description of the design project.
 
 - `src/models/` — OpenSCAD source files (top-level only)
 - `src/assets/` — Pre-built assets (top-level only)
+- `src/images/` — Optional user images (any format, converted to PNG)
 - `site/` — Generated viewer output (build artifact)
 
 ---
@@ -84,6 +85,11 @@ Optional (guided):
 2. **Source**: Deploy from a Branch
 3. Select `gh-pages` and `/ (root)`
 4. Save and wait for the site to publish
+
+The viewer includes:
+- Image browser with thumbnails and 3D toggle (for STL previews)
+- README and LICENSE tabs (rendered into the page during build)
+- Build date shown under the page title
 
 ---
 
