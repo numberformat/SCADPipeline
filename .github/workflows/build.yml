@@ -9,6 +9,9 @@ on:
       - "src/**"
       - "docs/**"
       - "scripts/**"
+      - "Dockerfile"
+      - "README.md"
+      - "LICENSE"
       - "build.sh"
       - "build.ps1"
       - ".github/workflows/build.yml"
@@ -19,21 +22,13 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      OPENSCAD_DOCKER_IMAGE: openscad/openscad:bookworm
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build with Docker
+      - name: Build
         run: |
-          docker run --rm \
-            --user "$(id -u):$(id -g)" \
-            -v "$PWD:/workspace" \
-            -w /workspace \
-            "$OPENSCAD_DOCKER_IMAGE" \
-            bash /workspace/scripts/docker-build.sh
+          ./pipeline.sh build
 
       # 🔎 Develop branch: build only
       - name: Upload STL artifact (develop only)
