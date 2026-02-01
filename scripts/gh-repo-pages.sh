@@ -245,6 +245,7 @@ main() {
       full_repo="$(create_repo)"
       info "GitHub Actions may be disabled by default on new repos."
       info "Enable it here: https://github.com/${full_repo}/settings/actions"
+      info "Wait for the build to complete (Actions tab)."
       info "After GitHub Actions publishes the gh-pages branch, enable Pages here:"
       info "https://github.com/${full_repo}/settings/pages"
       owner="$(printf "%s" "$full_repo" | awk -F/ '{print $1}')"
