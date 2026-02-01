@@ -191,6 +191,9 @@ rsync -av \
 
 cp "$PIPELINE_DIR/README.md" "./README_pipeline.md"
 if [ -f "./README_template.md" ]; then
+  if [ -f "./README.md" ]; then
+    mv "./README.md" "./README.md.orig"
+  fi
   mv "./README_template.md" "./README.md"
 fi
 
