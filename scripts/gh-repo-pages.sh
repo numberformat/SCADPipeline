@@ -243,10 +243,35 @@ main() {
       ensure_gh
       ensure_login
       full_repo="$(create_repo)"
+      owner="$(printf "%s" "$full_repo" | awk -F/ '{print $1}')"
+      repo="$(printf "%s" "$full_repo" | awk -F/ '{print $2}')"
+      pages_url="https://${owner}.github.io/${repo}/"
+      if [ -f "README.md" ] && ! grep -q "Interactive viewer:" "README.md"; then
+        tmp_readme="$(mktemp "${TMPDIR:-/tmp}/readme.XXXXXX")"
+        awk -v link="👉 Interactive viewer: ${pages_url}" '
+          BEGIN { inserted = 0 }
+          {
+            print
+            if (!inserted && $0 ~ /^#[[:space:]]+/) {
+              print ""
+              print link
+              inserted = 1
+            }
+          }
+          END {
+            if (!inserted) {
+              print ""
+              print link
+            }
+          }
+        ' README.md > "$tmp_readme"
+        mv "$tmp_readme" README.md
+      fi
       info "GitHub Actions may be disabled by default on new repos."
       info "Enable it here: https://github.com/${full_repo}/settings/actions"
       info "After GitHub Actions publishes the gh-pages branch, enable Pages here:"
       info "https://github.com/${full_repo}/settings/pages"
+      info "Interactive viewer: ${pages_url}"
       ;;
     enable-pages)
       ensure_gh
